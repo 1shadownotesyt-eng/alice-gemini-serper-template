@@ -75,6 +75,7 @@ async function fetchJson(url, options, timeoutMs) {
 }
 
 async function searchWeb(query, timeoutMs) {
+    const searchStartedAt = Date.now();
   const key = process.env.SERPER_API_KEY;
   if (!key || timeoutMs < 150) return "";
 
@@ -108,9 +109,16 @@ async function searchWeb(query, timeoutMs) {
 
     const answerBox = data.answerBox?.answer || data.answerBox?.snippet;
     if (answerBox) items.unshift(`Краткий ответ поисковика: ${String(answerBox).slice(0, 350)}`);
-    return items.length ? items.join("\n") : "";
+    console.log("Serper SUCCESS:", Date.now() - searchStartedAt, "ms");
+      return items.length ? items.join("\n") : "";
   } catch (error) {
-    console.warn("Serper request did not finish in time; continuing without search.");
+    console.warn(
+  "Serper ERROR:",
+  error?.name || "UnknownError",
+  error?.message || "",
+  Date.now() - searchStartedAt,
+  "ms"
+);
     return "";
   }
 }
