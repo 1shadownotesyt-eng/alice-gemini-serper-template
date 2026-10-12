@@ -216,6 +216,45 @@ function errorForUser(error) {
   }
 }
 
+
+async function redisCommand(command, timeoutMs = 650) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    throw new Error("REDIS_NOT_CONFIGURED");
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(command),
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`REDIS_HTTP_${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error("REDIS_COMMAND_FAILED");
+    }
+
+    return data.result;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === "GET") {
     return res.status(200).json({
