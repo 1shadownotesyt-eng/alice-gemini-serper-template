@@ -256,6 +256,20 @@ async function redisCommand(command, timeoutMs = 650) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === "GET" && req.query?.redis_test === "1") {
+    try {
+      const result = await redisCommand(["PING"], 2000);
+      return res.status(200).json({
+        redis: result === "PONG" ? "connected" : "unexpected_response"
+      });
+    } catch (error) {
+      return res.status(503).json({
+        redis: "connection_failed",
+        error: error.message
+      });
+    }
+  }
+
   if (req.method === "GET") {
     return res.status(200).json({
       ok: true,
