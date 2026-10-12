@@ -233,6 +233,7 @@ export default async function handler(req, res) {
   const body = req.body && typeof req.body === "object" ? req.body : {};
   const text = String(body?.request?.command || body?.request?.original_utterance || "").trim();
   const oldHistory = safeHistory(body?.state?.session?.history);
+  console.log("ALICE HISTORY:", oldHistory.length, "messages");
 
   if (!text) {
     return res.status(200).json(aliceResponse(
