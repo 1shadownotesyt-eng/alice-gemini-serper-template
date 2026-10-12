@@ -258,12 +258,12 @@ export default async function handler(req, res) {
     );
 
     const history = [
-      ...oldHistory,
-      { role: "user", text: text.slice(0, MAX_HISTORY_MESSAGE_CHARS) },
-      { role: "model", text: answer.slice(0, MAX_HISTORY_MESSAGE_CHARS) }
-    ].slice(-MAX_HISTORY_MESSAGES);
+  ...oldHistory,
+  { role: "user", text: text.slice(0, 100) },
+  { role: "model", text: answer.slice(0, 100) }
+].slice(-2);
 
-    return res.status(200).json(aliceResponse(answer, false, history));
+   return res.status(200).json(aliceResponse(answer, false, []));
   } catch (error) {
     const safeError = error?.message === "AbortError" ? "TIME_BUDGET_EXHAUSTED" : error;
     console.warn("Alice webhook returned a fallback response:", safeError?.message || "unknown error");
